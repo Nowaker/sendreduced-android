@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Send Reduced (dev)</string>
+    <string name="get_reduced_label">Get Reduced Photo</string>
+
+    <string name="profiles_title">Profiles</string>
+    <string name="add_profile">Add profile</string>
+    <string name="edit_profile">Edit profile</string>
+    <string name="new_profile">New profile</string>
+    <string name="delete_profile">Delete profile</string>
+    <string name="save">Save</string>
+    <string name="cancel">Cancel</string>
+
+    <string name="profile_name">Profile name</string>
+    <string name="format">Output format</string>
+    <string name="format_jpeg">JPEG</string>
+    <string name="format_png">PNG</string>
+    <string name="jpeg_quality">JPEG quality: %1$d</string>
+    <string name="max_resolution">Max resolution (px, longest side)</string>
+    <string name="keep_original_resolution">Keep original resolution</string>
+    <string name="preserve_metadata">Preserve metadata (EXIF, GPS, date)</string>
+    <string name="preserve_metadata_summary">When off, all metadata is stripped for privacy. JPEG only.</string>
+
+    <string name="include_direct">Include specific recipients</string>
+    <string name="licenses">Licenses</string>
+
+    <string name="choose_profile">Choose a profile</string>
+    <string name="processing">Reducing photos\u2026</string>
+    <string name="error_no_images">Could not process the image.</string>
+    <string name="name_required">Please enter a name.</string>
+    <string name="share_chooser_title">Share reduced photo with\u2026</string>
+
+    <string name="summary_keep_res">keep size</string>
+    <string name="summary_strip">stripped</string>
+    <string name="summary_keep_meta">metadata kept</string>
+</resources>
