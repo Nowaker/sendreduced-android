@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Send Reduced (dev)</string>
-    <string name="get_reduced_label">Get Reduced Photo</string>
 
     <string name="profiles_title">Profiles</string>
     <string name="add_profile">Add profile</string>

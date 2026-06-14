@@ -8,11 +8,18 @@ import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
 import java.util.List;
 
-/** Lets other apps request a reduced image via GET_CONTENT / PICK. Uses the first profile. */
+/**
+ * Source for other apps that request an image (GET_CONTENT / PICK): opens the
+ * gallery, reduces the chosen photo with the selected profile, and returns it
+ * to the caller.
+ */
 public class GetReduced extends AppCompatActivity {
 
     private final ActivityResultLauncher<Intent> picker = registerForActivityResult(
@@ -20,11 +27,11 @@ public class GetReduced extends AppCompatActivity {
             result -> {
                 Intent data = result.getData();
                 if (result.getResultCode() == RESULT_OK && data != null && data.getData() != null) {
-                    deliver(data.getData());
+                    onPicked(data.getData());
                 } else {
                     setResult(RESULT_CANCELED);
+                    finish();
                 }
-                finish();
             });
 
     @Override
@@ -38,20 +45,60 @@ public class GetReduced extends AppCompatActivity {
             return;
         }
 
-        Intent pick = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-        pick.putExtra(Utils.INTENT_FROM_ME, true);
-        picker.launch(pick);
+        if (savedInstanceState == null) {
+            Intent pick = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+            pick.putExtra(Utils.INTENT_FROM_ME, true);
+            picker.launch(pick);
+        }
     }
 
-    private void deliver(Uri source) {
+    private void onPicked(final Uri source) {
         List<Profile> profiles = Store.loadProfiles(this);
-        Uri reduced = new Utils(getApplicationContext(), profiles.get(0)).reduce(source);
-        if (reduced == null) {
-            setResult(RESULT_CANCELED);
-            return;
+        if (profiles.size() <= 1) {
+            process(profiles.get(0), source);
+        } else {
+            String[] names = new String[profiles.size()];
+            for (int i = 0; i < profiles.size(); i++) {
+                names[i] = profiles.get(i).name;
+            }
+            final List<Profile> finalProfiles = profiles;
+            new MaterialAlertDialogBuilder(this)
+                    .setTitle(R.string.choose_profile)
+                    .setItems(names, (dialog, which) -> process(finalProfiles.get(which), source))
+                    .setOnCancelListener(dialog -> {
+                        setResult(RESULT_CANCELED);
+                        finish();
+                    })
+                    .show();
         }
-        Intent result = new Intent().setData(reduced);
-        result.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-        setResult(RESULT_OK, result);
+    }
+
+    private void process(final Profile profile, final Uri source) {
+        final AlertDialog progress = new MaterialAlertDialogBuilder(this)
+                .setView(R.layout.dialog_progress)
+                .setCancelable(false)
+                .create();
+        progress.show();
+
+        new Thread(() -> {
+            final Uri reduced = new Utils(getApplicationContext(), profile).reduce(source);
+            runOnUiThread(() -> {
+                if (isFinishing() || isDestroyed()) {
+                    return;
+                }
+                if (progress.isShowing()) {
+                    progress.dismiss();
+                }
+                if (reduced == null) {
+                    Toast.makeText(this, R.string.error_no_images, Toast.LENGTH_LONG).show();
+                    setResult(RESULT_CANCELED);
+                } else {
+                    Intent result = new Intent().setData(reduced);
+                    result.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                    setResult(RESULT_OK, result);
+                }
+                finish();
+            });
+        }).start();
     }
 }
