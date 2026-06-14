@@ -5,14 +5,25 @@
 The development device is reachable over Tailscale at
 `oneplus.ts.nowaker.net:5555` (adb over TCP).
 
-Once the app is built, **always attempt to install it via adb on that device**:
+**Every build must automatically do BOTH of the following:**
 
-```sh
-adb connect oneplus.ts.nowaker.net:5555
-./gradlew :app:installDebug
-# or, after a manual assemble:
-adb -s oneplus.ts.nowaker.net:5555 install -r app/build/outputs/apk/debug/app-debug.apk
-```
+1. **Install on the phone over adb:**
+
+   ```sh
+   adb connect oneplus.ts.nowaker.net:5555
+   adb -s oneplus.ts.nowaker.net:5555 install -r app/build/outputs/apk/debug/app-debug.apk
+   ```
+
+2. **Archive the APK to the synced ownCloud apks folder**, named by
+   `versionName` (mirrors the convention of the other projects there):
+
+   ```sh
+   cp app/build/outputs/apk/debug/app-debug.apk \
+      ~/sync/owncloud/documents/apks/send-reduced/send-reduced-debug-v<versionName>.apk
+   ```
+
+   `<versionName>` comes from `app/build.gradle`; bump it to keep distinct
+   archived builds. That directory syncs to ownCloud automatically.
 
 Verify the installed build:
 
